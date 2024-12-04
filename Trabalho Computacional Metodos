@@ -1,1 +1,161 @@
+from sympy import symbols, sympify, diff, sin, cos, exp, log, pi, E
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+
+# Configurações para entrada mais natural de expressões matemáticas
+transformations = (standard_transformations + (implicit_multiplication_application,))
+
+def bisseccao(funcStr, a, b, delta):
+    x = symbols('x')
+    f = parse_expr(funcStr, transformations=transformations)
+    meio = (a + b) / 2.0
+    iterCount = 1
+    
+    print(f"{'Iteração':<10}{'a':<15}{'b':<15}{'meio':<15}{'f(meio)':<15}")
+    
+    while (b - a) / 2.0 > delta:
+        print(f"{iterCount:<10}{a:<15}{b:<15}{meio:<15}{f.subs(x, meio):<15}")
+        if f.subs(x, meio) == 0.0:
+            return meio
+        elif f.subs(x, a) * f.subs(x, meio) < 0:
+            b = meio
+        else:
+            a = meio
+        meio = (a + b) / 2.0
+        iterCount += 1
+    
+    return meio
+
+
+def pontoFixo(phiStr, x0, delta, maxIter):
+    x = symbols('x')
+    phi = parse_expr(phiStr, transformations=transformations)
+    x1 = phi.subs(x, x0)
+    iterCount = 1
+    
+    print(f"{'Iteração':<10}{'x0':<15}{'x1':<15}{'Diferença':<15}")
+    
+    while abs(x1 - x0) > delta and iterCount <= maxIter:
+        print(f"{iterCount:<10}{x0:<15}{x1:<15}{abs(x1 - x0):<15}")
+        x0 = x1
+        x1 = phi.subs(x, x0)
+        iterCount += 1
+    
+    return x1
+
+
+def newtonRaphson(funcStr, x0, delta, maxIter):
+    x = symbols('x')
+    f = parse_expr(funcStr, transformations=transformations)
+    fDerivada = diff(f, x)
+    
+    x1 = x0 - f.subs(x, x0) / fDerivada.subs(x, x0)
+    iterCount = 1
+    
+    print(f"{'Iteração':<10}{'x0':<15}{'x1':<15}{'f(x)':<15}{'Diferença':<15}")
+    
+    while abs(x1 - x0) > delta and iterCount <= maxIter:
+        print(f"{iterCount:<10}{x0:<15}{x1:<15}{f.subs(x, x0):<15}{abs(x1 - x0):<15}")
+        x0 = x1
+        x1 = x0 - f.subs(x, x0) / fDerivada.subs(x, x0)
+        iterCount += 1
+    
+    return x1
+
+
+def secante(funcStr, x0, x1, delta, maxIter):
+    x = symbols('x')
+    f = parse_expr(funcStr, transformations=transformations)
+    iterCount = 1
+    
+    print(f"{'Iteração':<10}{'x0':<15}{'x1':<15}{'x2':<15}{'Diferença':<15}")
+    
+    while abs(x1 - x0) > delta and iterCount <= maxIter:
+        x2 = x1 - f.subs(x, x1) * (x1 - x0) / (f.subs(x, x1) - f.subs(x, x0))
+        print(f"{iterCount:<10}{float(x0):<15}{float(x1):<15}{abs(float(x1) - float(x0)):<15}")
+        x0 = x1
+        x1 = x2
+        iterCount += 1
+    
+    return x1
+
+
+
+def regulaFalsi(funcStr, a, b, delta, maxIter):
+    x = symbols('x')
+    f = parse_expr(funcStr, transformations=transformations)
+    iterCount = 1
+    
+    if f.subs(x, a) * f.subs(x, b) > 0:
+        print("Os valores de a e b não cercam uma raiz. Tente com outro intervalo.")
+        return None
+
+    print(f"{'Iteração':<10}{'a':<15}{'b':<15}{'xVal':<15}{'f(xVal)':<15}")
+    
+    while iterCount <= maxIter:
+        xVal = a - f.subs(x, a) * (b - a) / (f.subs(x, b) - f.subs(x, a))
+        f_xVal = f.subs(x, xVal)
+        
+        print(f"{iterCount:<10}{float(a):<15}{float(b):<15}{float(xVal):<15}{float(f_xVal):<15}")
+        
+        if abs(f_xVal) < delta:
+            break
+        
+        if f.subs(x, a) * f_xVal < 0:
+            b = xVal
+        else:
+            a = xVal
+
+        iterCount += 1
+    
+    return xVal
+
+
+def main():
+    print("Escolha o método numérico:")
+    print("1. Método da Bissecção")
+    print("2. Método Iterativo Linear (Ponto Fixo)")
+    print("3. Método de Newton-Raphson")
+    print("4. Método da Secante")
+    print("5. Método da Regula Falsi")
+    
+    escolha = int(input("Digite o número do método escolhido: "))
+
+
+    funcStr = input("Digite a função f(x) como string (ex: 'x^3 - 9*x + 3' ou 'x^2 + e^x'): ")
+    delta = float(input("Digite o valor da precisão desejada (delta): "))
+    maxIter = int(input("Digite o número máximo de iterações: "))
+
+    if escolha == 1:
+        a = float(input("Digite o valor inicial do intervalo (a): "))
+        b = float(input("Digite o valor final do intervalo (b): "))
+        resultado = bisseccao(funcStr, a, b, delta)
+    
+    elif escolha == 2:
+        phiStr = input("Digite a função de iteração phi(x) como string (ex: 'sqrt(2 + x)'): ")
+        x0 = float(input("Digite o valor inicial (x0): "))
+        resultado = pontoFixo(phiStr, x0, delta, maxIter)
+    
+    elif escolha == 3:
+        x0 = float(input("Digite o valor inicial (x0): "))
+        resultado = newtonRaphson(funcStr, x0, delta, maxIter)
+    
+    elif escolha == 4:
+        x0 = float(input("Digite o primeiro valor inicial (x0): "))
+        x1 = float(input("Digite o segundo valor inicial (x1): "))
+        resultado = secante(funcStr, x0, x1, delta, maxIter)
+    
+    elif escolha == 5:
+        a = float(input("Digite o valor inicial do intervalo (a): "))
+        b = float(input("Digite o valor final do intervalo (b): "))
+        resultado = regulaFalsi(funcStr, a, b, delta, maxIter)
+    
+    else:
+        print("Escolha inválida.")
+        return
+
+    print(f"A raiz encontrada é: {resultado}")
+
+#Boas praticas para codigos futuros
+if __name__ == "__main__":
+    main()
 
