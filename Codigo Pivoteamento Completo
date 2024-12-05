@@ -1,6 +1,5 @@
-
 def pivoteamento_completo(A, b):
-    n = len(A)  # Número de linhas (ou colunas, já que A é quadrada)
+    n = len(A)  
     
     if n != len(A[0]):
         raise ValueError("A matriz A deve ser quadrada!")
@@ -8,11 +7,10 @@ def pivoteamento_completo(A, b):
     ordem = list(range(n))  # Ordem das variáveis
     multiplicadores = []  # Para armazenar os multiplicadores usados
 
-    # Criar a matriz aumentada A|b
+    # matriz aumentada
     for i in range(n):
         A[i].append(b[i])
 
-    # Processo de eliminação de Gauss com pivoteamento completo
     for k in range(n - 1):  
         # Encontrar o pivô máximo (elemento de maior valor absoluto)
         max_val = 0
@@ -49,7 +47,7 @@ def pivoteamento_completo(A, b):
             for j in range(k, n + 1):  # n+1 inclui a coluna do vetor b
                 A[i][j] -= fator * A[k][j]
 
-        # Mostrar a matriz após a eliminação
+        #matriz após a eliminação
         print("Matriz após eliminação:")
         for row in A:
             print(row)
@@ -92,14 +90,11 @@ def obter_matriz_entrada(n):
     return A, b
 
 def main():
-    # Entrada do usuário para o tamanho da matriz
     n = int(input("Digite o tamanho da matriz (n x n): "))
 
-    # Obter a matriz A e o vetor b
     A, b = obter_matriz_entrada(n)
 
-    # Chamar a função de pivoteamento completo
     solucao = pivoteamento_completo(A, b)
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
